@@ -22,7 +22,7 @@ namespace DatingApp.API.Controllers
         public AuthController(IAuthRepository repo, IConfiguration config)
         {
             _config = config;
-            _repo = repo;    
+            _repo = repo;
         }
 
         [HttpPost("register")]
@@ -30,9 +30,9 @@ namespace DatingApp.API.Controllers
         {
             userForRegisterDto.Username = userForRegisterDto.Username.ToLower();
 
-            if(await _repo.UserExists(userForRegisterDto.Username))
+            if (await _repo.UserExists(userForRegisterDto.Username))
                 return BadRequest("Username already exists");
-            
+
             var userToCreate = new User
             {
                 UserName = userForRegisterDto.Username
@@ -47,18 +47,21 @@ namespace DatingApp.API.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login(UserForLoginDto userForLoginDto)
         {
+
+            // throw new Exception("Computer says no!");
+
             // checks if the user exists in the database
             var userFromRepo = await _repo.Login(userForLoginDto.Username.ToLower(), userForLoginDto.Password);
 
             if (userFromRepo == null)
                 return Unauthorized();
-            
+
             // creates the token claims and key
             var claims = new[]
             {
-                new Claim(ClaimTypes.NameIdentifier, userFromRepo.Id.ToString()),
-                new Claim(ClaimTypes.Name, userFromRepo.UserName)
-            };
+                    new Claim(ClaimTypes.NameIdentifier, userFromRepo.Id.ToString()),
+                    new Claim(ClaimTypes.Name, userFromRepo.UserName)
+                };
 
             // the token key is set on appsettings.json
             var key = new SymmetricSecurityKey(Encoding.UTF8
@@ -78,9 +81,11 @@ namespace DatingApp.API.Controllers
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
 
-            return Ok(new {
+            return Ok(new
+            {
                 token = tokenHandler.WriteToken(token)
             });
+
         }
     }
 }
